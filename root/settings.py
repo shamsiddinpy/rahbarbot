@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'rest_framework_simplejwt',
     'corsheaders',
+    'channels',
 
 ]
 
@@ -173,3 +174,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 #     "https://frontend.example.com",
 #     "https://another-frontend.example.com",
 # ]
+
+ASGI_APPLICATION = "root.asgi.application"
+
+# Channels uchun WebSocket backend
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Local foydalanish uchun
+    },
+}
