@@ -8,11 +8,11 @@ from apps.views import UserCreateView
 # API va Swagger uchun URL yo‘llarini to‘g‘rilash
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('apps.urls')),  # apps.urls ichidagi yo‘llar
+    path('api/', include('apps.urls')),  # apps.urls ichidagi yo‘llar
     path('api-auth/', include('rest_framework.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 ]

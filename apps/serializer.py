@@ -1,7 +1,8 @@
 from django.contrib.auth.hashers import make_password
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, CharField
-from apps.models import User
+from apps.models import User, Request
+
 
 class UserSerializer(ModelSerializer):
     confirm_password = CharField(write_only=True, required=True)
@@ -24,3 +25,17 @@ class UserSerializer(ModelSerializer):
         validated_data['password'] = make_password(validated_data['password'])
         user = User.objects.create(**validated_data)
         return user
+
+
+class RequestSerializer(ModelSerializer):
+    class Meta:
+        model = Request
+        fields = ['id', 'user', 'reason', 'attachment', 'full_name', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def validate(self, data):
+        if not data.get("user"):
+            raise ValidationError({"user": "User field is required."})
+        if not data.get("reason"):
+            raise ValidationError({"reason": "Reason field is required."})
+        return data

@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-v$3jm3o*qy(0_4juk&596ug2&4a=1hcdl0t)vhe6ukx-2dfuss
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '77.177.199.120', '0.0.0.0']
 
 # Application definition
 
@@ -42,10 +42,12 @@ INSTALLED_APPS = [
     "rest_framework",
     'drf_spectacular',
     'rest_framework_simplejwt',
+    'corsheaders',
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -85,8 +87,8 @@ DATABASES = {
         'NAME': os.getenv("DB_NAME"),
         'USER': os.getenv("DB_USER"),
         'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': os.getenv("DB_HOST"),
-        'PORT': os.getenv("DB_PORT"),
+        'HOST': os.getenv("DB_HOST", 'db'),
+        'PORT': os.getenv("DB_PORT", '5432'),
     }
 }
 
@@ -143,11 +145,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-
+    'PAGE_SIZE': 10
 }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=7), # Access tokenning amal qilish muddati
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1), # Refresh tokenning amal qilish muddati
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),  # Access tokenning amal qilish muddati
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  # Refresh tokenning amal qilish muddati
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
@@ -164,3 +166,10 @@ SPECTACULAR_SETTINGS = {
         "displayOperationId": True,
     },
 }
+
+TELEGRAM_BOT_TOKEN = os.getenv("TOKEN_BOT")
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://frontend.example.com",
+#     "https://another-frontend.example.com",
+# ]

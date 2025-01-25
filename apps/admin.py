@@ -1,13 +1,16 @@
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin
-from .models import User
+from .models import User, Request
 
 
-class UserAdmin(ModelAdmin):
-    list_display = (
-        'phone', 'name', 'role', 'position', 'phone','is_active')  # 'username' o'rniga 'phone'
-    list_filter = ('role', 'is_active')
-    search_fields = ('phone', 'name', 'telegram_id')  # 'username'ni 'phone'ga almashtirdik
-    ordering = ('-is_active', 'role')
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'telegram_id', 'phone', 'role', 'is_active', 'is_staff')
+    search_fields = ('name', 'telegram_id', 'phone')
+    list_filter = ('is_active', 'role', 'is_staff')
 
-admin.site.register(User, UserAdmin)
+
+@admin.register(Request)
+class RequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'reason', 'created_at')
+    search_fields = ('reason', 'user__name', 'user__telegram_id')
+    list_filter = ('created_at', )
