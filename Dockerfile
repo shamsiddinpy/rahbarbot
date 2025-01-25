@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y libpq-dev && apt-get clean
 
 # Ishchi katalogni o'rnatish
 WORKDIR /app
-
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 # Requirementsni ko'chirish va o'rnatish
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
