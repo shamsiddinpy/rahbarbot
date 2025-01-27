@@ -30,7 +30,7 @@ class UserSerializer(ModelSerializer):
 class RequestSerializer(ModelSerializer):
     class Meta:
         model = Request
-        fields = ['id', 'user', 'reason', 'attachment', 'full_name', 'created_at']
+        fields = ['id', 'user', 'reason', 'attachment', 'full_name', 'created_at', 'phone_number', 'is_read']
         read_only_fields = ['id', 'created_at']
 
     def validate(self, data):
@@ -39,3 +39,13 @@ class RequestSerializer(ModelSerializer):
         if not data.get("reason"):
             raise ValidationError({"reason": "Reason field is required."})
         return data
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # user_id va username ni formatlash
+        representation['user_id'] = instance.user.id if instance.user else None
+        representation['username'] = instance.user.username if instance.user else "Unknown User"
+        representation['user_info'] = instance.full_name
+        representation['phone_number'] = instance.phone_number
+        representation['created_at'] = instance.created_at.isoformat() if instance.created_at else None
+        return representation
