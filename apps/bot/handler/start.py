@@ -48,24 +48,24 @@ async def cmd_start(message: Message):
             )
 
     await create_or_get_user()
-    begin_text = (
-        """📩 Ходимлар учун аноним ёки очиқ мурожаат имконияти! 📩
+    start_message = """
+    📩 Ходимлар учун аноним ёки очиқ мурожаат имконияти! 📩
 
-        Ҳурматли фойдаланувчи, эндиликда аноним ёки очиқ равишда ўз фикрларингиз, таклифларингиз ёки муаммоларингизни бот орқали раҳбарга жўнатишингиз мумкин.
+    Ҳурматли фойдаланувчи, эндиликда аноним ёки очиқ равишда ўз фикрларингиз, таклифларингиз ёки муаммоларингизни бот орқали раҳбарга жўнатишингиз мумкин.
 
-        🤐 (Ихтиёрий) анонимлик кафолатланади! Агар аноним мурожаатни танласангиз, шахсий маълумотларингиз сақланмайди ва ошкор қилинмайди.
+    🤐 (Ихтиёрий) анонимлик кафолатланади! Агар аноним мурожаатни танласангиз, шахсий маълумотларингиз сақланмайди ва ошкор қилинмайди.
 
-        👤 Қандай ишлайди?
-        1️⃣ 📝 Сўров ёки таклифингизни ёзинг.
-        2️⃣ 📷 Агар хоҳласангиз, расм ёки видео юкланг.
-        3️⃣ 🔒 Аноним ёки очиқ тарзда юборишни танланг.
-        4️⃣ ✅ Тасдиқланг ва юборинг !
+    👤 Қандай ишлайди?\n
+    1️⃣ 📝 Сўров ёки таклифингизни ёзинг.\n
+    2️⃣ 📷 Агар хоҳласангиз, расм ёки видео юкланг.\n
+    3️⃣ 🔒 Аноним ёки очиқ тарзда юборишни танланг.\n
+    4️⃣ ✅ Тасдиқланг ва юборинг!
 
-        📨 Ишончли, тезкор ва эркин алоқа – раҳбарга бевосита етказилади!
-        ⬇️ Тугмани босиб, мурожаатингизни юборинг ⬇️
-        """
-    )
-    await message.answer(begin_text, reply_markup=get_contact_keyboard())
+    📤 Ишончли, тезкор ва эркин алоқа – раҳбарга бевосита етказилади!
+
+    ⬇️ Тугмани босиб, мурожаатингизни юборинг ⬇️
+    """
+    await message.answer(start_message, reply_markup=get_contact_keyboard())
 
 
 @main_router.callback_query(lambda c: c.data == "rahbarga")
@@ -281,13 +281,16 @@ async def confirm_data(callback: CallbackQuery, state: FSMContext):
         await callback.message.answer("Маълумотларни сақлашда хатолик юз берди.")
         return
 
-    await callback.message.answer("Маълумотларингиз юборилди.\n қайтадан /start босинг", )
+    await callback.message.answer("Муражаатингизни юборилди, қайтадан мурожаат юборис учун босинг",
+                                  reply_markup=restart_button())
 
-    # Rahbarga yuborish
-    manager_telegram_id = os.getenv("MANAGER_TELEGRAM_ID")
-    if not manager_telegram_id:
-        await callback.message.answer("Раҳбар ID аниқланмади. Админ билан боғланинг.")
+    manager_telegram_ids = os.getenv("MANAGER_TELEGRAM_ID")
+
+    if not manager_telegram_ids:
+        await callback.message.answer("Раҳбар ID аниқланмади. Админ билан боғланинг.", )
         return
+
+    chat_ids = [int(chat_id) for chat_id in manager_telegram_ids.split(',')]
 
     message_to_manager = (
         f"📩 *Янги мурожаат* қолдирилди:\n\n"
@@ -298,22 +301,22 @@ async def confirm_data(callback: CallbackQuery, state: FSMContext):
     )
 
     try:
-        await bot.send_message(
-            chat_id=manager_telegram_id,
-            text=message_to_manager,
-            reply_markup=to_answer(request.id),  # Request ID bilan tugmalarni qo'shish
-            parse_mode="Markdown"
-        )
-        # logger.info(message_to_manager)
-        for attach in attachment:
-            t = attach["type"]
-            fid = attach["file_id"]
-            if t == "photo":
-                await bot.send_photo(manager_telegram_id, fid)
-            elif t == "video":
-                await bot.send_video(manager_telegram_id, fid)
-            elif t == "video_note":
-                await bot.send_video_note(manager_telegram_id, fid)
+        for chat_id in chat_ids:
+            await bot.send_message(
+                chat_id=chat_id,
+                text=message_to_manager,
+                reply_markup=to_answer(request.id),
+                parse_mode="Markdown"
+            )
+            for attach in attachment:
+                t = attach["type"]
+                fid = attach["file_id"]
+                if t == "photo":
+                    await bot.send_photo(chat_id, fid)
+                elif t == "video":
+                    await bot.send_video(chat_id, fid)
+                elif t == "video_note":
+                    await bot.send_video_note(chat_id, fid)
     except Exception as e:
         logging.error(f"Раҳбарга хабар юборишда хатолик: {e}")
 
@@ -365,7 +368,6 @@ async def send_reply(message: Message, state: FSMContext):
     request_id = data.get("request_id")
     user_telegram_id = data.get("telegram_id")
     main_msg_id = data.get("message_id")
-
     reply_text = message.text
 
     @sync_to_async
@@ -380,7 +382,7 @@ async def send_reply(message: Message, state: FSMContext):
 
         await bot.send_message(
             chat_id=user_telegram_id,
-            text=f"📩 *Раҳбардан жавоб бор!*\n\n{reply_text}",
+            text=f"📩 *Раҳбардан жавоб келди!*\n\n{reply_text}",
             parse_mode="Markdown"
         )
 
@@ -478,5 +480,13 @@ async def restart_process(callback: CallbackQuery, state: FSMContext):
         "Муражатингизни ёзиб қолдиринг....",
         reply_markup=murajat_button()
     )
+    await state.set_state(ComplaintForm.waiting_for_complaint)
+    await callback.answer()
+
+
+@main_router.callback_query(lambda c: c.data == "cancel_restart_button")
+async def cancel_restart_button(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer("Муражаатингизни юборилди, қайтадан мурожаат юбориш учун босинг",
+                                  reply_markup=murajat_button())
     await state.set_state(ComplaintForm.waiting_for_complaint)
     await callback.answer()

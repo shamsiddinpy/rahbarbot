@@ -43,6 +43,7 @@ class GetMeView(APIView):
 class RequestViewSet(CreateAPIView):
     queryset = Request.objects.all()
     serializer_class = RequestSerializer
+    pagination_class = None
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

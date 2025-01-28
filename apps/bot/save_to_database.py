@@ -50,6 +50,7 @@ async def save_to_model(
 
         await sync_to_async(complaint.save)()
 
+        # Request obyektini qaytarish
         return complaint
 
     except Exception as e:

@@ -111,7 +111,18 @@ def restart_button():
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="🔄 Қайтадан ариза беринг", callback_data="restart_process")
+                InlineKeyboardButton(text="🔄 Қайтадан мурoжаат бериш", callback_data="restart_process")
+            ]
+        ]
+    )
+
+
+
+def cancel_restart_button():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="🔄 Қайтадан мурoжаат бериш", callback_data="cancel_restart_button")
             ]
         ]
     )
